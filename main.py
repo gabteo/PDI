@@ -157,10 +157,10 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                 component = {
                     "label": label,
                     "n_pixels": info['n_pixels'],
-                    'T': info['T'],
-                    'L': info['L'],
-                    'B': info['B'],
-                    'R': info['R']
+                    'T': info['R'],
+                    'L': info['B'],
+                    'B': info['L'],
+                    'R': info['T']
                 }
                 if (component['n_pixels'] > 10):
                     outputList.append(component)
