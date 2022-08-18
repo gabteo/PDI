@@ -35,12 +35,12 @@ Valor de retorno: versão binarizada da img_in.'''
     rows, cols, channels = img.shape
     for row in range (rows):
         for col in range (cols):
-            if (img [row,col] < THRESHOLD):
+            if (img [row, col] < threshold):
                 img[row, col] = 0
             else:
                 img[row, col] = 1
 
-    #img = np.where(img < THRESHOLD, 0, 0)
+    # img = np.where(img < THRESHOLD, 0, 1)
     return img
     # TODO: escreva o código desta função.
     # Dica/desafio: usando a função np.where, dá para fazer a binarização muito
@@ -55,8 +55,8 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
     temp = {
         'T': y0,
         'L': x0,
-        'B': y0+15,
-        'R': x0+15,
+        'B': y0,
+        'R': x0,
         'n_pixels': 0
     }
 
@@ -70,6 +70,9 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
 
     if (labelMatrix[x0,y0+1] == -1):
         temp = flood(label, labelMatrix, x0,y0+1, n_pixels)
+        print(temp)
+        # for x in range(len(temp.keys())-1):
+        #     print(x)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
         if (temp['B'] > info['B']):
@@ -118,19 +121,9 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
 
 
 
-    '''yMin = y0
-    xMin = x0
-    yMax = y0
-    xMax = x0'''
     info['n_pixels'] = n_pixels + n
 
-    '''info = {
-        'T': temp['T'],
-        'L': temp['L'],
-        'B': temp['B'],
-        'R': temp['R'],
-        'n_pixels': n_pixels + n
-    }'''
+  
     return info
 
 #-------------------------------------------------------------------------------
