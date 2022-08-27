@@ -48,8 +48,8 @@ Valor de retorno: versão binarizada da img_in.'''
     # rapidamente, e com apenas uma linha de código!
 
 #-------------------------------------------------------------------------------
-def flood (label, labelMatrix, x0, y0, n_pixels):
-    labelMatrix[x0,y0] = label
+def flood (label, labelMatrix, y0, x0, n_pixels):
+    labelMatrix[y0,x0] = label
 
     n_pixels += 1
     n = 0
@@ -69,8 +69,27 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
-    if (labelMatrix[x0,y0+1] == -1):
-        temp = flood(label, labelMatrix, x0,y0+1, n_pixels)
+    """ neighbors = [labelMatrix[x0,y0+1], labelMatrix[x0+1,y0], labelMatrix[x0-1,  y0], labelMatrix[x0, y0-1]]
+    neighborsIndex = [[x0, y0+1], [x0+1, y0], [x0-1, y0], [x0-1, y0]] 
+
+    for index in range(len(neighbors)):
+        #index = neighbors.index(neighbor)
+        #print(index)
+        #print(neighbors[index])
+        if (neighbors[index] == -1):
+            temp = flood(label, labelMatrix, neighborsIndex[index][0], neighborsIndex[index][1], n_pixels)
+            if (temp['T'] < info['T']):
+                info['T'] = temp['T']
+            if (temp['B'] > info['B']):
+                info['B'] = temp['B']
+            if (temp['L'] < info['L']):
+                info['L'] = temp['L']
+            if (temp['R'] > info['R']):
+                info['R'] = temp['R']
+            n += temp['n_pixels'] """
+
+    if (labelMatrix[y0+1, x0] == -1):
+        temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
         print(temp)
         # for x in range(len(temp.keys())-1):
         #     print(x)
@@ -84,8 +103,8 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[x0+1,y0] == -1):
-        temp = flood(label, labelMatrix, x0+1,y0, n_pixels)
+    if (labelMatrix[y0, x0+1] == -1):
+        temp = flood(label, labelMatrix, y0, x0+1, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
         if (temp['B'] > info['B']):
@@ -96,8 +115,8 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[x0-1, y0] == -1):
-        temp = flood(label, labelMatrix, x0-1, y0, n_pixels)
+    if (labelMatrix[y0, x0-1] == -1):
+        temp = flood(label, labelMatrix, y0, x0-1, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
         if (temp['B'] > info['B']):
@@ -108,8 +127,8 @@ def flood (label, labelMatrix, x0, y0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[x0, y0-1] == -1):
-        temp = flood(label, labelMatrix, x0, y0-1, n_pixels)
+    if (labelMatrix[y0-1, x0] == -1):
+        temp = flood(label, labelMatrix, y0-1, x0, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
         if (temp['B'] > info['B']):
@@ -151,13 +170,13 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                 component = {
                     "label": label,
                     "n_pixels": info['n_pixels'],
-                    'T': info['R'],
-                    'L': info['B'],
-                    'B': info['L'],
-                    'R': info['T']
+                    'T': info['T'],
+                    'L': info['L'],
+                    'B': info['B'],
+                    'R': info['R']
                 }
                 if (component['n_pixels'] > N_PIXELS_MIN):
-                    if ((component['T']-component['B'] > ALTURA_MIN) and (component['L']-component['R'] > LARGURA_MIN)):
+                    if ((component['B']-component['T'] > ALTURA_MIN) and (component['R']-component['L'] > LARGURA_MIN)):
                         #print(component['T']-component['B'])
                         #print(component['L']-component['R'])
                         outputList.append(component)
