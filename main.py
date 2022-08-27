@@ -69,8 +69,8 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
-    """ neighbors = [labelMatrix[x0,y0+1], labelMatrix[x0+1,y0], labelMatrix[x0-1,  y0], labelMatrix[x0, y0-1]]
-    neighborsIndex = [[x0, y0+1], [x0+1, y0], [x0-1, y0], [x0-1, y0]] 
+    neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
+    neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
 
     for index in range(len(neighbors)):
         #index = neighbors.index(neighbor)
@@ -86,9 +86,9 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
                 info['L'] = temp['L']
             if (temp['R'] > info['R']):
                 info['R'] = temp['R']
-            n += temp['n_pixels'] """
+            n += temp['n_pixels']
 
-    if (labelMatrix[y0+1, x0] == -1):
+    """ if (labelMatrix[y0+1, x0] == -1):
         temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
         print(temp)
         # for x in range(len(temp.keys())-1):
@@ -137,9 +137,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
-        n += temp['n_pixels']
-
-
+        n += temp['n_pixels'] """
 
     info['n_pixels'] = n_pixels + n
 
