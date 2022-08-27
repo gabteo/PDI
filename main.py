@@ -12,7 +12,7 @@ import cv2
 
 #===============================================================================
 
-#INPUT_IMAGE =  'documento-3mp.bmp'
+# INPUT_IMAGE =  'documento-3mp.bmp'
 INPUT_IMAGE =  'arroz.bmp'
 
 # TODO: ajuste estes parâmetros!
@@ -22,17 +22,24 @@ ALTURA_MIN = 10
 LARGURA_MIN = 10
 N_PIXELS_MIN = 20
 
+# documento
+""" NEGATIVO = True
+THRESHOLD = 0.5
+ALTURA_MIN = 5
+LARGURA_MIN = 5
+N_PIXELS_MIN = 10 """
+
 #===============================================================================
 
 def binariza (img, threshold):
 
     ''' Binarização simples por limiarização.
 
-Parâmetros: img: imagem de entrada. Se tiver mais que 1 canal, binariza cada
+    Parâmetros: img: imagem de entrada. Se tiver mais que 1 canal, binariza cada
               canal independentemente.
             threshold: limiar.
             
-Valor de retorno: versão binarizada da img_in.'''
+    Valor de retorno: versão binarizada da img_in.'''
     rows, cols, channels = img.shape
     for row in range (rows):
         for col in range (cols):
@@ -41,7 +48,7 @@ Valor de retorno: versão binarizada da img_in.'''
             else:
                 img[row, col] = 1
 
-    # img = np.where(img < THRESHOLD, 0, 1)
+    # img = np.where(img < threshold, 0, 1)
     return img
     # TODO: escreva o código desta função.
     # Dica/desafio: usando a função np.where, dá para fazer a binarização muito
@@ -50,6 +57,7 @@ Valor de retorno: versão binarizada da img_in.'''
 #-------------------------------------------------------------------------------
 def flood (label, labelMatrix, y0, x0, n_pixels):
     labelMatrix[y0,x0] = label
+    rows, cols = labelMatrix.shape
 
     n_pixels += 1
     n = 0
@@ -69,7 +77,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
-    neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
+    """ neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
     neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
 
     for index in range(len(neighbors)):
@@ -86,11 +94,11 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
                 info['L'] = temp['L']
             if (temp['R'] > info['R']):
                 info['R'] = temp['R']
-            n += temp['n_pixels']
+            n += temp['n_pixels'] """
 
-    """ if (labelMatrix[y0+1, x0] == -1):
+    if ((y0+1) < rows and labelMatrix[y0+1, x0] == -1):
         temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
-        print(temp)
+        # print(temp)
         # for x in range(len(temp.keys())-1):
         #     print(x)
         if (temp['T'] < info['T']):
@@ -103,7 +111,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[y0, x0+1] == -1):
+    if ((x0+1) < cols and labelMatrix[y0, x0+1] == -1):
         temp = flood(label, labelMatrix, y0, x0+1, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
@@ -115,7 +123,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[y0, x0-1] == -1):
+    if ((x0-1) >= 0 and labelMatrix[y0, x0-1] == -1):
         temp = flood(label, labelMatrix, y0, x0-1, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
@@ -127,7 +135,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['R'] = temp['R']
         n += temp['n_pixels']
 
-    if (labelMatrix[y0-1, x0] == -1):
+    if ((y0-1) >= 0 and labelMatrix[y0-1, x0] == -1):
         temp = flood(label, labelMatrix, y0-1, x0, n_pixels)
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
@@ -137,7 +145,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
-        n += temp['n_pixels'] """
+        n += temp['n_pixels']
 
     info['n_pixels'] = n_pixels + n
 
@@ -147,11 +155,13 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
 #-------------------------------------------------------------------------------
 
 def rotula (img, largura_min, altura_min, n_pixels_min):
+    # Obtem linhas e colunas, cria matriz auxiliar e a lista de saída
     rows, cols, channels = img.shape
 
     labelMatrix = np.empty((rows, cols))
     outputList = []
 
+    # Rotula os pixels de interesse como não percorridos
     for row in range(rows):
         for col in range(cols):
             if (img[row, col] == 0):
@@ -159,6 +169,8 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
             else:
                 labelMatrix[row, col] = -1
 
+    sys.setrecursionlimit(5000)
+    # recursão
     label = 1
     for row in range(rows):
         for col in range(cols):
@@ -173,10 +185,8 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                     'B': info['B'],
                     'R': info['R']
                 }
-                if (component['n_pixels'] > N_PIXELS_MIN):
-                    if ((component['B']-component['T'] > ALTURA_MIN) and (component['R']-component['L'] > LARGURA_MIN)):
-                        #print(component['T']-component['B'])
-                        #print(component['L']-component['R'])
+                if (component['n_pixels'] > n_pixels_min):
+                    if ((component['B']-component['T'] > altura_min) and (component['R']-component['L'] > largura_min)):
                         outputList.append(component)
                         label += 1
     '''Rotulagem usando flood fill. Marca os objetos da imagem com os valores
