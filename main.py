@@ -12,14 +12,15 @@ import cv2
 
 #===============================================================================
 
+#INPUT_IMAGE =  'documento-3mp.bmp'
 INPUT_IMAGE =  'arroz.bmp'
 
 # TODO: ajuste estes parâmetros!
 NEGATIVO = False
 THRESHOLD = 0.8
-ALTURA_MIN = 1
-LARGURA_MIN = 1
-N_PIXELS_MIN = 1
+ALTURA_MIN = 10
+LARGURA_MIN = 10
+N_PIXELS_MIN = 20
 
 #===============================================================================
 
@@ -155,9 +156,12 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                     'B': info['L'],
                     'R': info['T']
                 }
-                if (component['n_pixels'] > 10):
-                    outputList.append(component)
-                    label += 1
+                if (component['n_pixels'] > N_PIXELS_MIN):
+                    if ((component['T']-component['B'] > ALTURA_MIN) and (component['L']-component['R'] > LARGURA_MIN)):
+                        #print(component['T']-component['B'])
+                        #print(component['L']-component['R'])
+                        outputList.append(component)
+                        label += 1
     '''Rotulagem usando flood fill. Marca os objetos da imagem com os valores
 [0.1,0.2,etc].
 
