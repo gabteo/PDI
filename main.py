@@ -47,7 +47,7 @@ def binariza (img, threshold):
                 img[row, col] = 0
             else:
                 img[row, col] = 1
-
+    
     # img = np.where(img < threshold, 0, 1)
     return img
     # TODO: escreva o código desta função.
@@ -77,26 +77,29 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
-    """ neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
+    neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
     neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
 
     for index in range(len(neighbors)):
         #index = neighbors.index(neighbor)
         #print(index)
         #print(neighbors[index])
-        if (neighbors[index] == -1):
-            temp = flood(label, labelMatrix, neighborsIndex[index][0], neighborsIndex[index][1], n_pixels)
-            if (temp['T'] < info['T']):
-                info['T'] = temp['T']
-            if (temp['B'] > info['B']):
-                info['B'] = temp['B']
-            if (temp['L'] < info['L']):
-                info['L'] = temp['L']
-            if (temp['R'] > info['R']):
-                info['R'] = temp['R']
-            n += temp['n_pixels'] """
 
-    if ((y0+1) < rows and labelMatrix[y0+1, x0] == -1):
+        # check for image bounds
+        if ((index == 0 and (y0+1) < rows) or (index == 1 and (x0+1) < cols) or (index == 2 and (x0-1) >= 0) or (index == 3 and (y0-1) >= 0)):
+            if (neighbors[index] == -1):
+                temp = flood(label, labelMatrix, neighborsIndex[index][0], neighborsIndex[index][1], n_pixels)
+        if (temp['T'] < info['T']):
+            info['T'] = temp['T']
+        if (temp['B'] > info['B']):
+            info['B'] = temp['B']
+        if (temp['L'] < info['L']):
+            info['L'] = temp['L']
+        if (temp['R'] > info['R']):
+            info['R'] = temp['R']
+        n += temp['n_pixels']
+
+    """ if ((y0+1) < rows and labelMatrix[y0+1, x0] == -1):
         temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
         # print(temp)
         # for x in range(len(temp.keys())-1):
@@ -121,7 +124,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
-        n += temp['n_pixels']
+        n += temp['n_pixels'] """
 
     if ((x0-1) >= 0 and labelMatrix[y0, x0-1] == -1):
         temp = flood(label, labelMatrix, y0, x0-1, n_pixels)
