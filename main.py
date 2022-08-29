@@ -62,6 +62,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
 
     n_pixels += 1
     n = 0
+    # armazenamento temporário da saída de flood (chamada recursiva) para comparação com info (abaixo)
     temp = {
         'T': y0,
         'L': x0,
@@ -70,6 +71,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': 0
     }
 
+    # output da função flood
     info = {
         'T': temp['T'],
         'L': temp['L'],
@@ -78,6 +80,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
+    # vetores de vizinhos para iteração, cuidando das bordas da imagem
     n0 = labelMatrix[y0+1, x0] if (y0+1) < rows else 0
     n1 = labelMatrix[y0, x0+1] if (x0+1) < cols else 0
     n2 = labelMatrix[y0, x0-1] if (x0-1) >= 0 else 0
@@ -86,12 +89,16 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
     neighbors = [n0, n1, n2, n3]
     neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
 
+    # para cada vizinho...
     for index in range(len(neighbors)):
         
         # check for image bounds
         if ((index == 0 and (y0+1) < rows) or (index == 1 and (x0+1) < cols) or (index == 2 and (x0-1) >= 0) or (index == 3 and (y0-1) >= 0)):
+            # se o vizinho é de interesse e não foi visitado...
             if (neighbors[index] == -1):
+                # flood fill no vizinho
                 temp = flood(label, labelMatrix, neighborsIndex[index][0], neighborsIndex[index][1], n_pixels)
+        # verifica se as bordas aumentaram
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
         if (temp['B'] > info['B']):
@@ -100,8 +107,10 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
+        # soma os pixels de temp à saída atual de flood
         n += temp['n_pixels']
 
+    # primeira tentativa de visitar os visinhos (sem iterar por uma lista de visinhos)
     """ if ((y0+1) < rows and labelMatrix[y0+1, x0] == -1):
         temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
         # print(temp)
@@ -155,12 +164,36 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
 
     info['n_pixels'] = n_pixels + n
 
-  
     return info
 
 #-------------------------------------------------------------------------------
 
 def rotula (img, largura_min, altura_min, n_pixels_min):
+    '''Rotulagem usando flood fill. Marca os objetos da imagem com os valores
+    [0.1,0.2,etc].
+
+    Parâmetros: img: imagem de entrada E saída.
+                largura_min: descarta componentes com largura menor que esta.
+                altura_min: descarta componentes com altura menor que esta.
+                n_pixels_min: descarta componentes com menos pixels que isso.
+
+    Valor de retorno: uma lista, onde cada item é um vetor associativo (dictionary)
+    com os seguintes campos:
+
+    'label': rótulo do componente.
+    'n_pixels': número de pixels do componente.
+    'T', 'L', 'B', 'R': coordenadas do retângulo envolvente de um componente conexo,
+    respectivamente: topo, esquerda, baixo e direita.'''
+
+    '''n_pixels = 50
+    t= 50
+    l= 50
+    b= 50
+    r= 50'''
+
+    # TODO: escreva esta função.
+    # Use a abordagem com flood fill recursivo.
+
     # Obtem linhas e colunas, cria matriz auxiliar e a lista de saída
     rows, cols, channels = img.shape
 
@@ -174,12 +207,14 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                 labelMatrix[row, col] = 0
             else:
                 labelMatrix[row, col] = -1
-
-    sys.setrecursionlimit(5000)
+    
     # recursão
+    sys.setrecursionlimit(5000)
     label = 1
+    # para cada pixel...
     for row in range(rows):
         for col in range(cols):
+            # flood fill no pixel, se é de interesse e não visitado
             if (labelMatrix[row, col] == -1):
                 n_pixels = 0
                 info = flood(label, labelMatrix, row, col, n_pixels)
@@ -191,34 +226,11 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
                     'B': info['B'],
                     'R': info['R']
                 }
+                # verifica se componente tem as dimensões mínimas e adiciona à saída de rotula
                 if (component['n_pixels'] > n_pixels_min):
                     if ((component['B']-component['T'] > altura_min) and (component['R']-component['L'] > largura_min)):
                         outputList.append(component)
                         label += 1
-    '''Rotulagem usando flood fill. Marca os objetos da imagem com os valores
-[0.1,0.2,etc].
-
-Parâmetros: img: imagem de entrada E saída.
-            largura_min: descarta componentes com largura menor que esta.
-            altura_min: descarta componentes com altura menor que esta.
-            n_pixels_min: descarta componentes com menos pixels que isso.
-
-Valor de retorno: uma lista, onde cada item é um vetor associativo (dictionary)
-com os seguintes campos:
-
-'label': rótulo do componente.
-'n_pixels': número de pixels do componente.
-'T', 'L', 'B', 'R': coordenadas do retângulo envolvente de um componente conexo,
-respectivamente: topo, esquerda, baixo e direita.'''
-
-    '''n_pixels = 50
-    t= 50
-    l= 50
-    b= 50
-    r= 50'''
-
-    # TODO: escreva esta função.
-    # Use a abordagem com flood fill recursivo.
 
     return outputList
 #===============================================================================
