@@ -16,6 +16,7 @@ import cv2
 INPUT_IMAGE =  'arroz.bmp'
 
 # TODO: ajuste estes parâmetros!
+# arroz
 NEGATIVO = False
 THRESHOLD = 0.8
 ALTURA_MIN = 10
@@ -25,9 +26,9 @@ N_PIXELS_MIN = 20
 # documento
 """ NEGATIVO = True
 THRESHOLD = 0.5
-ALTURA_MIN = 5
-LARGURA_MIN = 5
-N_PIXELS_MIN = 10 """
+ALTURA_MIN = 4
+LARGURA_MIN = 4
+N_PIXELS_MIN = 8 """
 
 #===============================================================================
 
@@ -77,14 +78,16 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         'n_pixels': n_pixels + n
     }
 
-    neighbors = [labelMatrix[y0+1, x0], labelMatrix[y0, x0+1], labelMatrix[y0, x0-1], labelMatrix[y0-1, x0]]
+    n0 = labelMatrix[y0+1, x0] if (y0+1) < rows else 0
+    n1 = labelMatrix[y0, x0+1] if (x0+1) < cols else 0
+    n2 = labelMatrix[y0, x0-1] if (x0-1) >= 0 else 0
+    n3 = labelMatrix[y0-1, x0] if (y0-1) >= 0 else 0
+
+    neighbors = [n0, n1, n2, n3]
     neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
 
     for index in range(len(neighbors)):
-        #index = neighbors.index(neighbor)
-        #print(index)
-        #print(neighbors[index])
-
+        
         # check for image bounds
         if ((index == 0 and (y0+1) < rows) or (index == 1 and (x0+1) < cols) or (index == 2 and (x0-1) >= 0) or (index == 3 and (y0-1) >= 0)):
             if (neighbors[index] == -1):
@@ -124,7 +127,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
-        n += temp['n_pixels'] """
+        n += temp['n_pixels']
 
     if ((x0-1) >= 0 and labelMatrix[y0, x0-1] == -1):
         temp = flood(label, labelMatrix, y0, x0-1, n_pixels)
@@ -148,7 +151,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             info['L'] = temp['L']
         if (temp['R'] > info['R']):
             info['R'] = temp['R']
-        n += temp['n_pixels']
+        n += temp['n_pixels'] """
 
     info['n_pixels'] = n_pixels + n
 
