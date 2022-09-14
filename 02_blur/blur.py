@@ -50,8 +50,42 @@ def chadBlur(img, fullw):
 def blurSeparavel(img, halfWidth):
     pass
 
-def blurIntegral(img, halfWidth):
-    pass
+def blurIntegral(img, halfW):
+    fullW = 2*halfW+1
+    img_return = np.copy (img)
+    img_integral = np.array
+    img_integral = img.reshape((img.shape[0], img.shape[1], 1))
+
+    # criação da imagem integral --------------------------------
+    # para cada linha y
+    for y in range(0, len(img)):
+        # primeiro px da linha é igual o original
+        img_integral[y, 0] = img[y, 0]
+        # para cada coluna fora a primeira
+        for x in range(1, len(img[0])):
+            # pixel é px original mais integral à esquerda
+            img_integral[y, x] = img[y, x] + img_integral[y, x-1]
+
+
+    # para cada linha y fora a primeira
+    for y in range(1, len(img)):
+        # para cada coluna x
+        for x in range(0, len(img[0])):
+            # pixel é igual a ele mais pixel de cima
+            img_integral[y, x] += img_integral[y-1, x]
+    # print(img_integral)
+
+    # Obtenção da média ------------------------------------------
+    # para cada pixel...
+    for y in range(halfW, len(img)-halfW):
+        for x in range(halfW, len(img[0])-halfW):
+            # para cada pixel, janela:
+            soma = img_integral[y+halfW, x+halfW] - img_integral[y-halfW-1, x+halfW] - img_integral[y+halfW, x-halfW-1] + img_integral[y-halfW-1, x-halfW-1]
+            media = soma / (fullW**2)
+            img_return[y, x] = media
+    
+
+    return img_return
 
 
 
@@ -59,7 +93,7 @@ def main ():
     ingenuo = 1
     separavel = 2
     integral = 3
-    algoritmo = ingenuo
+    algoritmo = integral
 
     # Leitura do arquivo-----------------------------------
     img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_GRAYSCALE)
@@ -84,7 +118,7 @@ def main ():
         print ('Tempo separável: %f' % (timeit.default_timer () - start_time))
     elif algoritmo == integral:
         start_time = timeit.default_timer ()
-        img_output = blurIntegral(img, 9)
+        img_output = blurIntegral(img, 4) # meia largura como parametro
         cv2.imwrite('04 - blurIntegral.png', img_output*255)
         print ('Tempo integral: %f' % (timeit.default_timer () - start_time))
 
