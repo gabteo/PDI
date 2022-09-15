@@ -87,13 +87,21 @@ def blurIntegral(img, fullW):
             winH = fullW
             if (y>halfW):
                 soma -= img_integral[y-halfW-1, x+halfW]
+            else:
+                winH = y + halfW
+
             if (x>halfW):
                 soma -= img_integral[y+halfW, x-halfW-1] 
+            else:
+                winW = x + halfW
+
             if (x>halfW and y>halfW):
                 soma += img_integral[y-halfW-1, x-halfW-1]
+
+            if (len(img)-halfW<y):
+                soma += img_integral[len(img), x+halfW]
             """ soma = img_integral[y+halfW, x+halfW] - img_integral[y-halfW-1, x+halfW] - img_integral[y+halfW, x-halfW-1] + img_integral[y-halfW-1, x-halfW-1]
             media = soma / (fullW**2)
-            #print(media)
             img_return[y, x] = media """
             media = soma / (winH*winW)
             img_return[y, x] = media
@@ -130,10 +138,9 @@ def blurIntegral(img, fullW):
 
 
 def main ():
-    ingenuo = 1
-    separavel = 2
-    integral = 3
-    algoritmo = integral
+    ingenuo = False
+    separavel = False
+    integral = True
 
     # Leitura do arquivo-----------------------------------
     # img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_GRAYSCALE)
@@ -148,17 +155,17 @@ def main ():
     img /= 255
 
     # Algoritmos
-    if algoritmo == ingenuo:
+    if ingenuo:
         start_time = timeit.default_timer ()
         img_output = blurIngenuo(img, 9)
         cv2.imwrite('04 - blurIngenuo.png', img_output*255)
         print ('Tempo ingênuo: %f' % (timeit.default_timer () - start_time))
-    elif algoritmo == separavel:
+    if separavel:
         start_time = timeit.default_timer ()
         img_output = blurSeparavel(img, 9)
         cv2.imwrite('04 - blurSeparavel.png', img_output*255)
         print ('Tempo separável: %f' % (timeit.default_timer () - start_time))
-    elif algoritmo == integral:
+    if integral:
         start_time = timeit.default_timer ()
         img_output = blurIntegral(img, 55) 
         cv2.imwrite('04 - blurIntegral.png', img_output*255)
