@@ -53,7 +53,7 @@ def blurSeparavel(img, fullW):
 
     img_horizontal = np.copy(img)
 
-    for y in range(0, len(img)):
+    for y in range(halfW, len(img) - halfW):
         for x in range(halfW, len(img[0])-halfW):
             # para cada pixel
             soma = 0
@@ -61,8 +61,6 @@ def blurSeparavel(img, fullW):
                 soma += img[y, x+i]
             media = soma / fullW
             img_horizontal[y, x] = media
-        # if y % 10 == 0:
-        cv2.imshow('Blur', img_horizontal)
 
     img_return = np.copy(img_horizontal)
 
@@ -160,8 +158,8 @@ def blurIntegral(img, fullW):
 
 def main ():
     ingenuo = False
-    separavel = False
-    integral = True
+    separavel = True
+    integral = False
 
     # Leitura do arquivo-----------------------------------
     # img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_GRAYSCALE)
