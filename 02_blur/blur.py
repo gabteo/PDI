@@ -1,3 +1,4 @@
+from math import fabs
 import sys
 import timeit
 import numpy as np
@@ -50,7 +51,7 @@ def chadBlur(img, fullw):
 def blurSeparavel(img, fullW):
     halfW = fullW // 2
 
-    img_horizontal = np.copy(img.reshape((img.shape[0], img.shape[1], 3)))
+    img_horizontal = np.copy(img)
 
     for y in range(0, len(img)):
         for x in range(halfW, len(img[0])-halfW):
@@ -65,7 +66,7 @@ def blurSeparavel(img, fullW):
 
     img_return = np.copy(img_horizontal)
 
-    return img_horizontal
+    # return img_horizontal
     for y in range(halfW, len(img)-halfW):
         for x in range(halfW, len(img[0])-halfW):
             soma = 0
@@ -81,7 +82,8 @@ def blurIntegral(img, fullW):
     img_return = np.copy (img)
     img_integral = np.array
     img_integral = img.reshape((img.shape[0], img.shape[1], 3))
-
+    # print(len(img))
+    # print(len(img[0]))
     # criação da imagem integral --------------------------------
     # para cada linha y
     for y in range(0, len(img)):
@@ -103,58 +105,52 @@ def blurIntegral(img, fullW):
 
     # Obtenção da média ------------------------------------------
     # para cada pixel...
-    for y in range(0, len(img)-halfW):
-        for x in range(0, len(img[0])-halfW):
+    for y in range(0, len(img)):
+        for x in range(0, len(img[0])):
             # para cada pixel, janela:
             soma = 0
-            soma += img_integral[y+halfW, x+halfW]
+            xSoma = x+halfW
+            ySoma = y+halfW
+            # soma += img_integral[y+halfW, x+halfW]
             winW = fullW
             winH = fullW
+
+            # px na borda direita
+            if (x > (len(img[0])-1-halfW)):
+                xSoma = len(img[0]) - 1
+                winW = halfW + len(img[0]) - 1 - x
+            # px na borda inferior
+            if (y > (len(img)-1-halfW)):
+                ySoma = len(img) - 1
+                winH = halfW + len(img) - 1 - y
+
+            soma += img_integral[ySoma, xSoma]
+
             if (y>halfW):
-                soma -= img_integral[y-halfW-1, x+halfW]
+                # subtrai px superior direito de fora da janela
+                soma -= img_integral[y-halfW-1, xSoma]
             else:
+                # ajusta largura da janela: mais baixa que fullW
                 winH = y + halfW
 
             if (x>halfW):
-                soma -= img_integral[y+halfW, x-halfW-1] 
+                # subtrai px inferior esquerdo de fora da janela
+                soma -= img_integral[ySoma, x-halfW-1] 
             else:
+                # ajusta largura da janela: mais estreita que fullW
                 winW = x + halfW
 
             if (x>halfW and y>halfW):
+                # soma px superior esquerdo de fora da janela
                 soma += img_integral[y-halfW-1, x-halfW-1]
-
-            if (len(img)-halfW<y):
-                soma += img_integral[len(img), x+halfW]
-            """ soma = img_integral[y+halfW, x+halfW] - img_integral[y-halfW-1, x+halfW] - img_integral[y+halfW, x-halfW-1] + img_integral[y-halfW-1, x-halfW-1]
+  
+            """ 
+            # nos pixels que não são bordas:
+            soma = img_integral[y+halfW, x+halfW] - img_integral[y-halfW-1, x+halfW] - img_integral[y+halfW, x-halfW-1] + img_integral[y-halfW-1, x-halfW-1]
             media = soma / (fullW**2)
-            img_return[y, x] = media """
-            media = soma / (winH*winW)
             img_return[y, x] = media
-    
-    for y in range(0, halfW+1):
-        break
-        for x in range(0, len(img[0])-halfW):
-            soma = 0
-            soma += img_integral[y+halfW, x+halfW]
-            winW = fullW
-            winH = fullW
-            #print(type(soma[0]))
-            #print(img_integral[y+halfW, x-halfW-1][1])
-            """ if not (y<=halfW):
-                soma -= img_integral[y-halfW-1, x+halfW]
-                winW = x + halfW  """
-            if (x>halfW):
-                soma -= img_integral[y+halfW, x-halfW-1] 
-                winW = fullW
-                #winH = y + halfW
-                
-            """  if not (y<=halfW):
-                soma -= img_integral[y-halfW-1, x+halfW]
-            if not (x<=halfW):
-                soma -= img_integral[y+halfW, x-halfW-1] 
-            if (x>=halfW and y>=halfW):
-                soma += img_integral[y-halfW-1, x-halfW-1] """
-                
+            """
+
             media = soma / (winH*winW)
             img_return[y, x] = media
 
@@ -185,19 +181,21 @@ def main ():
         img_output = blurIngenuo(img, 9)
         cv2.imwrite('04 - blurIngenuo.png', img_output*255)
         print ('Tempo ingênuo: %f' % (timeit.default_timer () - start_time))
+        cv2.imshow('Output', img_output)
     if separavel:
         start_time = timeit.default_timer ()
-        img_output = blurSeparavel(img, 251)
+        img_output = blurSeparavel(img, 15)
         cv2.imwrite('04 - blurSeparavel.png', img_output*255)
         print ('Tempo separável: %f' % (timeit.default_timer () - start_time))
+        cv2.imshow('Output', img_output)
     if integral:
         start_time = timeit.default_timer ()
-        img_output = blurIntegral(img, 9) 
+        img_output = blurIntegral(img, 55) 
         cv2.imwrite('04 - blurIntegral.png', img_output*255)
         print ('Tempo integral: %f' % (timeit.default_timer () - start_time))
+        cv2.imshow('Output', img_output)
 
-    # mostrar a imagem de saída
-    cv2.imshow('Output', img_output)    # TODO saída branca
+    # cv2.imshow('Output', img_output)
     cv2.waitKey ()
     cv2.destroyAllWindows ()
 
