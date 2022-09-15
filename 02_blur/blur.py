@@ -47,8 +47,33 @@ def chadBlur(img, fullw):
 
     return img_return
 
-def blurSeparavel(img, halfWidth):
-    pass
+def blurSeparavel(img, fullW):
+    halfW = fullW // 2
+
+    img_horizontal = np.copy(img.reshape((img.shape[0], img.shape[1], 3)))
+
+    for y in range(0, len(img)):
+        for x in range(halfW, len(img[0])-halfW):
+            # para cada pixel
+            soma = 0
+            for i in range(-halfW, halfW+1):
+                soma += img[y, x+i]
+            media = soma / fullW
+            img_horizontal[y, x] = media
+        # if y % 10 == 0:
+        cv2.imshow('Blur', img_horizontal)
+
+    img_return = np.copy(img_horizontal)
+
+    return img_horizontal
+    for y in range(halfW, len(img)-halfW):
+        for x in range(halfW, len(img[0])-halfW):
+            soma = 0
+            for i in range(-halfW, halfW + 1):
+                soma += img_horizontal[y+i, x]
+            img_return[y, x] = soma / fullW
+    
+    return img_return
 
 def blurIntegral(img, fullW):
     halfW = fullW // 2
@@ -133,7 +158,7 @@ def main ():
     ingenuo = 1
     separavel = 2
     integral = 3
-    algoritmo = integral
+    algoritmo = separavel
 
     # Leitura do arquivo-----------------------------------
     # img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_GRAYSCALE)
@@ -155,12 +180,12 @@ def main ():
         print ('Tempo ingênuo: %f' % (timeit.default_timer () - start_time))
     elif algoritmo == separavel:
         start_time = timeit.default_timer ()
-        img_output = blurSeparavel(img, 9)
+        img_output = blurSeparavel(img, 251)
         cv2.imwrite('04 - blurSeparavel.png', img_output*255)
         print ('Tempo separável: %f' % (timeit.default_timer () - start_time))
     elif algoritmo == integral:
         start_time = timeit.default_timer ()
-        img_output = blurIntegral(img, 55) 
+        img_output = blurIntegral(img, 9) 
         cv2.imwrite('04 - blurIntegral.png', img_output*255)
         print ('Tempo integral: %f' % (timeit.default_timer () - start_time))
 
