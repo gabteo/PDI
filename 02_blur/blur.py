@@ -173,13 +173,5 @@ def main ():
     cv2.destroyAllWindows ()
 
 
-    # print(type (img))
-    # img_output = blurh(img, 9)
-    # cv2.imwrite('03 - blurh.png', img_output*255)
-    """ img_output = chadBlur(img, 9)
-    cv2.imwrite('04 - chadblur.png', img_output*255)
-    cv2.imshow('ChadBlur', img_output*255)
- """
-
 if __name__ == '__main__':
     main ()
