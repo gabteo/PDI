@@ -17,7 +17,7 @@ def boxBloom(img, background):
     for i in range (1, 4):
         tmpBlurred = np.copy(background)
         for j in range (3):
-            tmpBlurred = cv2.blur(tmpBlurred, (15*i, 15))
+            tmpBlurred = cv2.blur(tmpBlurred, (15*i, 15*i))
         backgroundBlurred += tmpBlurred
     imgReturn = 0.9 * img + 0.1 * backgroundBlurred
     return imgReturn
