@@ -3,13 +3,17 @@ import numpy as np
 import cv2
 
 INPUT_IMAGE = 'example.png'
-BACKGROUND_THRESHOLD = 0.5
+BACKGROUND_THRESHOLD = 0.4
+
+""" INPUT_IMAGE = 'mine.png'
+BACKGROUND_THRESHOLD = 0.6 """
 
 def gaussianBloom(img, background):
     backgroundBlurred = np.zeros_like(img)
     for i in range (1, 4):
-        backgroundBlurred += cv2.GaussianBlur(background, (25,25), 4**i)
-    imgReturn = 0.9 * img + 0.1 * backgroundBlurred
+        backgroundBlurred += cv2.GaussianBlur(background, (75,75), 4**i)
+    imgReturn = 0.9 * img + 0.3 * backgroundBlurred
+    cv2.imshow('Background blur gaussian', backgroundBlurred)
     return imgReturn
 
 def boxBloom(img, background):
@@ -19,14 +23,15 @@ def boxBloom(img, background):
         for j in range (3):
             tmpBlurred = cv2.blur(tmpBlurred, (15*i, 15*i))
         backgroundBlurred += tmpBlurred
-    imgReturn = 0.9 * img + 0.1 * backgroundBlurred
+    imgReturn = 0.9 * img + 0.3 * backgroundBlurred
+    cv2.imshow('Background blur boxblur', backgroundBlurred)
     return imgReturn
 
 
 def main():
 
     img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_COLOR)
-
+    cv2.imshow('No Effect', img)
     if img is None:
         print('Cannot open image')
         sys.exit()
@@ -40,12 +45,12 @@ def main():
         for x in range (len(img[0])):
             if imgGray[y, x] < BACKGROUND_THRESHOLD:
                 imgBackground[y, x] = 0
-    # cv2.imshow('Background', imgBackground)
+    cv2.imshow('Background', imgBackground)
 
     boxFinal = boxBloom(img, imgBackground)
     gaussianFinal = gaussianBloom(img, imgBackground)
 
-    cv2.imshow('No Effect', img)
+    
     cv2.imshow('Gaussian Bloom', gaussianFinal)
     cv2.imshow('Box Bloom', boxFinal)
     cv2.waitKey()
