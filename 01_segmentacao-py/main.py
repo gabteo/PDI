@@ -110,7 +110,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
         # soma os pixels de temp à saída atual de flood
         n += temp['n_pixels']
 
-    # primeira tentativa de visitar os visinhos (sem iterar por uma lista de visinhos)
+    # primeira tentativa de visitar os vizinhos (sem iterar por uma lista de vizinhos)
     """ if ((y0+1) < rows and labelMatrix[y0+1, x0] == -1):
         temp = flood(label, labelMatrix, y0+1, x0, n_pixels)
         # print(temp)

@@ -18,7 +18,7 @@ import cv2
 # ===============================================================================
 
 #IMAGES = '60.bmp', '82.bmp', '114.bmp', '150.bmp', '205.bmp'
-IMAGES = '60.bmp', '82.bmp', 
+IMAGES = '150.bmp', 
 # ===============================================================================
 
 
@@ -151,6 +151,7 @@ def main():
         if img is None:
             print('Erro abrindo a imagem.\n')
             sys.exit()
+        cv2.imshow('Original', img)
 
         # É uma boa prática manter o shape com 3 valores, independente da imagem ser
         # colorida ou não. Também já convertemos para float32.
@@ -162,9 +163,9 @@ def main():
 
         img = img*255
         gauss = cv2.GaussianBlur(img, (401, 401), 0)
-        cv2.imshow('img-gauss', gauss)
+        cv2.imshow('img-gauss', gauss/255)
         img2 = img[:, :, 0] - gauss
-        cv2.imshow('img-det', img2)
+        cv2.imshow('img-det', img2/255)
         
         img_gauss = img2.astype(np.uint8)
         _, thresh = cv2.threshold(img2, 60, 255, cv2.THRESH_BINARY)
