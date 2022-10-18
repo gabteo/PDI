@@ -12,13 +12,13 @@ import statistics
 import timeit
 import numpy as np
 import cv2
-from scipy import stats
+#from scipy import stats
 
 
 # ===============================================================================
 
-IMAGES = '60.bmp', '82.bmp', '114.bmp', '150.bmp', '205.bmp'
-
+#IMAGES = '60.bmp', '82.bmp', '114.bmp', '150.bmp', '205.bmp'
+IMAGES = '60.bmp', '82.bmp', 
 # ===============================================================================
 
 
@@ -162,13 +162,17 @@ def main():
 
         img = img*255
         gauss = cv2.GaussianBlur(img, (401, 401), 0)
+        cv2.imshow('img-gauss', gauss)
         img2 = img[:, :, 0] - gauss
-
+        cv2.imshow('img-det', img2)
+        
         img_gauss = img2.astype(np.uint8)
         _, thresh = cv2.threshold(img2, 60, 255, cv2.THRESH_BINARY)
-
+        cv2.imshow('img-thresh', thresh)
         img_median = cv2.medianBlur(thresh, 5)
+        cv2.imshow('img-median1', img_median)
         img_median = cv2.medianBlur(img_median, 5)
+        cv2.imshow('img-median2', img_median)
 
         cmpnts = label(img_median)
 

@@ -28,6 +28,9 @@ def main():
     dilatation = cv2.dilate(imgCanny, kernel, iterations=1)
     closing = cv2.erode(dilatation, kernel, iterations=1)
 
+
+    closing = cv2.dilate(imgCanny, kernel, iterations=2)
+
     cv2.imshow('Closing', closing)
 
     cv2.waitKey()
