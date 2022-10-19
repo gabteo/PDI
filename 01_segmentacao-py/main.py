@@ -184,7 +184,7 @@ def rotula (img, largura_min, altura_min, n_pixels_min):
     'n_pixels': número de pixels do componente.
     'T', 'L', 'B', 'R': coordenadas do retângulo envolvente de um componente conexo,
     respectivamente: topo, esquerda, baixo e direita.'''
-
+ 
     '''n_pixels = 50
     t= 50
     l= 50

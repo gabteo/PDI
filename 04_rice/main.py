@@ -11,7 +11,7 @@ pxBlob = -1
 
 def flood (label, labelMatrix, y0, x0, n_pixels):
     global pxBlob
-    print('flood')
+    #print('flood')
     labelMatrix[y0,x0] = label
     rows, cols = labelMatrix.shape
     pxBlob += 1
@@ -56,7 +56,7 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
             # print(n)
             # print(labelMatrix)
             temp = flood(label, labelMatrix, neighborsIndex[index][0], neighborsIndex[index][1], n_pixels)
-            print(temp)
+            #print(temp)
         # verifica se as bordas aumentaram
         if (temp['T'] < info['T']):
             info['T'] = temp['T']
@@ -131,7 +131,7 @@ def main():
     img1px = np.zeros((50, 50))
     img1px[20, 20], img1px[20, 21], img1px[21, 20], img1px[21, 21] = 255, 255, 255, 255
     img1px = img1px.astype(np.float32)
-    print(img1px)
+    #print(img1px)
 
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img255 = np.copy(imgGray)
@@ -165,14 +165,21 @@ def main():
     cv2.imshow('closing', closing)
 
     components, sizeList = rotula(closing)
-    print(components)
+    #print(components)
     print(sizeList)
+    plt.boxplot(sizeList)
+    fig1, ax1 = plt.subplots()
+    ax1.set_title('Basic Plot')
+    plt.boxplot(sizeList)
+    plt.show()
 
     """  for blob in components:
         print(blob['n_pixels']) """
     for c in components:
         cv2.rectangle (img, (c ['L'], c ['T']), (c ['R'], c ['B']), (0,0,255))
     
+   
+
     cv2.imshow('Rect', img)
     
     if hist:
