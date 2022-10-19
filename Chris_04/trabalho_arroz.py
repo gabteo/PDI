@@ -17,8 +17,8 @@ import cv2
 
 # ===============================================================================
 
-#IMAGES = '60.bmp', '82.bmp', '114.bmp', '150.bmp', '205.bmp'
-IMAGES = '150.bmp', 
+IMAGES = '60.bmp', '82.bmp', '114.bmp', '150.bmp', '205.bmp'
+# IMAGES = '150.bmp', 
 # ===============================================================================
 
 
@@ -130,6 +130,7 @@ def countGrains(components):
     div = np.min(pixel_arr)
 
     k = getK(nOut, threshold)
+    print(k)
     divv = div * k
     if divv < div:
         divv = div

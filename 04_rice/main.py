@@ -1,3 +1,4 @@
+from math import sqrt
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -5,7 +6,7 @@ import sys
 
 np.set_printoptions(threshold=sys.maxsize)
 
-INPUT_IMAGE = '150.bmp'
+INPUT_IMAGE = '82.bmp'
 
 pxBlob = -1
 
@@ -37,10 +38,10 @@ def flood (label, labelMatrix, y0, x0, n_pixels):
     }
 
     # vetores de vizinhos para iteração, cuidando das bordas da imagem
-    n0 = labelMatrix[y0+1, x0] #if (y0+1) < rows else 0
-    n1 = labelMatrix[y0, x0+1] #if (x0+1) < cols else 0
-    n2 = labelMatrix[y0, x0-1] #if (x0-1) >= 0 else 0
-    n3 = labelMatrix[y0-1, x0] #if (y0-1) >= 0 else 0
+    n0 = labelMatrix[y0+1, x0] if (y0+1) < rows else 0
+    n1 = labelMatrix[y0, x0+1] if (x0+1) < cols else 0
+    n2 = labelMatrix[y0, x0-1] if (x0-1) >= 0 else 0
+    n3 = labelMatrix[y0-1, x0] if (y0-1) >= 0 else 0
 
     neighbors = [n0, n1, n2, n3]
     neighborsIndex = [[y0+1, x0], [y0, x0+1], [y0, x0-1], [y0-1, x0]] 
@@ -123,7 +124,7 @@ def rotula (img, largura_min=0, altura_min=0, n_pixels_min=0):
 
 
 def main():
-    hist = 0
+    hist = 1
     img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_COLOR)
     imgTeste = cv2.imread("n1px.bmp", cv2.IMREAD_COLOR)
     imgTeste = cv2.cvtColor(imgTeste, cv2.COLOR_BGR2GRAY)
@@ -149,7 +150,7 @@ def main():
     img_median = cv2.medianBlur(img_median, 5)
     cv2.imshow('median twice', img_median)
 
-    img_gaussian = cv2.GaussianBlur(img_median, (201, 201), 0)
+    img_gaussian = cv2.GaussianBlur(img_median, (301, 301), 0)
     blobs = img_median - img_gaussian
     blobs = np.where(blobs < 0, 0, blobs)
     cv2.imshow('Blobs', blobs)
@@ -165,32 +166,114 @@ def main():
     cv2.imshow('closing', closing)
 
     components, sizeList = rotula(closing)
-    #print(components)
+    sizeListCopy = np.copy(sizeList)
+    sizeList.sort()
     print(sizeList)
-    plt.boxplot(sizeList)
-    fig1, ax1 = plt.subplots()
-    ax1.set_title('Basic Plot')
-    plt.boxplot(sizeList)
-    plt.show()
+    medianaTamanhos = np.median(sizeList)
+    media = np.mean(sizeList)
+    std = np.std(sizeList)
 
-    """  for blob in components:
-        print(blob['n_pixels']) """
+    print("Mediana = ", medianaTamanhos)
+    print("Média = ", media)
+    print("Desvio Padrão = ", std)
+
     for c in components:
-        cv2.rectangle (img, (c ['L'], c ['T']), (c ['R'], c ['B']), (0,0,255))
-    
-   
+        cv2.rectangle (img, (c ['L'], c ['T']), (c ['R'], c ['B']), (0, 255, 0))
 
+
+
+    figure, axis = plt.subplots(3, 2)
+
+    bp = axis[0, 0].boxplot(sizeList)
+    axis[0, 0].set_title('Boxplot 1')
+
+    axis[0, 1].violinplot(sizeList)
+    axis[0, 1].set_title('Violin 1')
+
+    # print(bp['caps'][0].get_ydata())
+
+    dict1 = {}
+    # dict1['label'] = labels[0]
+    dict1['lower_whisker'] = bp['whiskers'][0].get_ydata()[1]
+    dict1['lower_quartile'] = bp['boxes'][0].get_ydata()[1]
+    dict1['median'] = bp['medians'][0].get_ydata()[1]
+    dict1['upper_quartile'] = bp['boxes'][0].get_ydata()[2]
+    dict1['upper_whisker'] = bp['whiskers'][0].get_ydata()[1]
+    print(dict1)
+
+    sum = 0
+    count = 0
+    for i in sizeList:
+        if (i >= dict1['lower_quartile'] and i <= dict1['median']):
+            sum += i
+            count += 1
+    meanRice = sum / count
+    
+    sum = 0
+    count = 0
+    for i in sizeList:
+        if (i >= dict1['lower_whisker'] and i <= dict1['lower_quartile']):
+            sum += i
+            count += 1
+    meanSmallRice = sum / count
+
+    print('Arroz pequeno médio: ', meanSmallRice)
+    print('Arroz médio: ', meanRice)
+
+    riceCount = 0
+    notRemainder = 0
+    remainders = []
+    denominador = meanRice
+    for blob in range(len(sizeList)):
+        if sizeList[blob] <= meanRice:
+            component = components[np.where(sizeListCopy == sizeList[blob])[0][0]]
+            cv2.putText(img, '1', (component['L'], component['T']), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            riceCount += 1
+            notRemainder += 1
+        else:
+            component = components[np.where(sizeListCopy == sizeList[blob])[0][0]]
+            riceCount += sizeList[blob] // denominador
+            notRemainder += sizeList[blob] // denominador
+            remainder = sizeList[blob] % denominador
+            cv2.putText(img, str(int(sizeList[blob] // denominador) + int(remainder // (denominador / 2))), (component['L'], component['T']), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            remainders.append(remainder)
+            riceCount += remainder // (denominador / 2)
+            # print('Resto: ', blob % meanRice)
+    
+    print('Not Remainder: ', notRemainder)
+    print('Remainder: ', len(remainders))
+    print('Rice Count: ', riceCount)
+
+    tinyRices = []
+    for i in sizeList:
+        if i < dict1['lower_quartile']:
+            tinyRices.append(i)
+
+    axis[1, 0].boxplot(remainders)
+    axis[1, 0].set_title('BoxPlot Remainders')
+
+    axis[1, 1].violinplot(remainders)
+    axis[1, 1].set_title('Violin Remainders')
+
+    axis[2, 0].boxplot(tinyRices)
+    axis[2, 0].set_title('BoxPlot Tiny Rices')
+
+    axis[2, 1].violinplot(tinyRices)
+    axis[2, 1].set_title('Violin Tiny Rices')
+    
     cv2.imshow('Rect', img)
-    
-    if hist:
-        plt.figure("Original")
-        plt.hist((imgFloat*255).ravel(),255,[0,255])
-        plt.figure("Blobs")
-        plt.hist((blobs * 255).ravel(),255,[0,255])
-        plt.figure("Median")
-        plt.hist((img_median * 255).ravel(),255,[0,255])
-        plt.show()
 
+    if hist:
+        figure, axis = plt.subplots(3, 1)
+        figure.set_label('Histograms')
+        axis[0].hist((imgFloat*255).ravel(),255,[0,255])
+        axis[0].set_title('Original Image')
+        axis[1].hist((blobs * 255).ravel(),255,[0,255])
+        axis[1].set_title('Blobs')
+        axis[2].hist((img_median * 255).ravel(),255,[0,255])
+        axis[2].set_title('Median')
+
+    plt.show()
     cv2.waitKey()
     cv2.destroyAllWindows()
 
