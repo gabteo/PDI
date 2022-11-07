@@ -6,6 +6,9 @@ import sys
 
 INPUT_IMAGE = 'img_in\GSPlate.0116.bmp'
 BACKGROUND = 'bg\embassy_shootout2.0116.bmp'
+H = 0
+L = 1
+S = 2
 
 # site com vários exemplos de chroma key para praticar:
 # https://www.hollywoodcamerawork.com/green-screen-plates.html
@@ -18,9 +21,13 @@ def main():
     cv2.imshow('input', img)
     cv2.imshow('backgroung', bg)
 
-    hsl = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+    hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
     # H está no range [0,180???]. L e S em [0,255]
+    # ATENÇÃO: HLS, não HSL
 
+    # hue do primeiro pixel: hls[0, 0, 0]
+    # hls[linha, coluna, HLS]
+    print(hls[0, 1, H])
 
 
     # 
@@ -28,7 +35,13 @@ def main():
 
 
     # balanço de branco automático? como detectar o verde mais presente?
+    # ideia 1:
     # fazer um "histograma de verdes": o verde com mais presença é o verde desejado
+
+    # ideia 2:
+    # histograma de hue. Na faixa esperada pro verde, encontrar média/mediana/moda (escolher o melhor??)
+    # "centralizar o verde nesse valor"
+
     # converter pra HSL
     # calcular valores HSL de interesse
     # zerar luminância dos valores de interesse
