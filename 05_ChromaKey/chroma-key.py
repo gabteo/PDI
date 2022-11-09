@@ -5,23 +5,19 @@ import cv2
 from matplotlib import pyplot as plt
 import sys
 
-INPUT_IMAGE = 'img_in\\2.bmp'
+INPUT_IMAGE = 'img_in\\8.bmp'
+#INPUT_IMAGE = 'img_in\GSPlate.0116.bmp'
+
 #INPUT_IMAGE = 'img_in\hcw_godiva_medium.0110.png'
 #INPUT_IMAGE = 'img_in\green255.png'
 #INPUT_IMAGE = 'img_in\greenScale.png'
-BACKGROUND = 'bg\embassy_shootout2.0116.bmp'
+BACKGROUND = 'bg\minecraft_bg.jpg'
 
 
 H = 0
 L = 1
 S = 2
-""" 
-GREEN_MAX = 73
-GREEN_MIN = 37 """
-""" GREEN_MAX = 160 - 50
-GREEN_MIN = 75 - 50 """
-""" GREEN_MAX = 73
-GREEN_MIN = 45 """
+
 GREEN_MAX = 55+13
 GREEN_MIN = 55-13
 
@@ -39,17 +35,22 @@ def normalizar(valor, max, min = 0):
 
 def main():
     hist = False
+    bgColor = False #define se background é cor sólida
     img = cv2.imread(INPUT_IMAGE, cv2.IMREAD_COLOR)
     bg = cv2.imread(BACKGROUND, cv2.IMREAD_COLOR)
     
+    rows, cols, _ = img.shape
+    dim = (cols, rows)
+  
+    # resize image
+    bg = cv2.resize(bg, dim, interpolation = cv2.INTER_AREA)
+
+
     alphaLayer = np.copy(img)
     alphaLayer = cv2.cvtColor(alphaLayer, cv2.COLOR_BGR2GRAY)
     alphaLayer = alphaLayer.astype(np.float32)/255
-    # imgTeste = cv2.cvtColor(imgTeste, cv2.COLOR_BGR2GRAY)
-    rows, cols, lixo = img.shape
 
     cv2.imshow('input', img)
-    #cv2.imshow('backgroung', bg)
 
     # converter pra HSL
     hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
@@ -81,7 +82,7 @@ def main():
     #alphaLayerColor = np.copy(hls)
 
     # loop para encontrar o verde da imagem (assume-se que há verde)
-    huesVerdes = []
+    """     huesVerdes = []
     saturacoesVerdes = []
     lumasVerdes = []
     distVerdes = []
@@ -92,7 +93,6 @@ def main():
                 # se não for muito claro ou muito escuro...
                 if (hls[row, col, S] >= SATURATION_MIN and hls[row, col, S] <= SATURATION_MAX):
                     # se saturação não for muito fraca..
-
                     # calcula a média dos verdes, pra encontrar o verde "central"
                     if (hls[row, col, H] >= GREEN_MIN and hls[row, col, H] <= GREEN_MAX):
                         huesVerdes.append(hls[row, col, H])
@@ -100,28 +100,14 @@ def main():
                         lumasVerdes.append(hls[row, col, L])
                         nVerdes += 1
 
-    """ imageGreen = np.copy(img)
-    imageGreen = cv2.cvtColor(imageGreen, cv2.COLOR_BGR2HLS)
-    for row in range(rows):
-        for col in range(cols):
-            if (row<rows/2):
-                imageGreen[row, col, H] = GREEN_MAX
-            else:
-                imageGreen[row, col, H] = GREEN_MIN
-            imageGreen[row, col, S] = 255
-            imageGreen[row, col, L] = 255/2
-    imageGreen = cv2.cvtColor(imageGreen, cv2.COLOR_HLS2BGR)
-    cv2.imshow("verdes", imageGreen) """
-
-
     mediaHuesVerdes = np.mean(huesVerdes)
     mediaLumasVerdes = np.mean(lumasVerdes)
 
     mediaSaturacoesVerdes = np.mean(saturacoesVerdes)
     # encontramos o verde "predominante"! Temos o HSL dele
-    mediaVerdes = (mediaHuesVerdes, mediaLumasVerdes, mediaSaturacoesVerdes)
+    mediaVerdes = (mediaHuesVerdes, mediaLumasVerdes, mediaSaturacoesVerdes) """
     
-    for i in range(nVerdes):
+    """ for i in range(nVerdes):
         hueDist = abs(huesVerdes[i] - mediaHuesVerdes)
         distVerdes.append(hueDist)
 
@@ -129,7 +115,7 @@ def main():
     distVerdesNormalizadas = []
     for i in range(nVerdes):
         distMax = max(abs(GREEN_MAX-mediaHuesVerdes), abs(GREEN_MIN-mediaHuesVerdes))
-        distVerdesNormalizadas.append(normalizar(distVerdes[i], distMax, 0))
+        distVerdesNormalizadas.append(normalizar(distVerdes[i], distMax, 0)) """
 
 
     # mesmo loop, agora para calcular a camada alpha
@@ -140,68 +126,43 @@ def main():
                 if (hls[row, col, L] >= LUMA_MIN and hls[row, col, L] <= LUMA_MAX):
                     # se não for muito claro ou muito escuro...
                     if (hls[row, col, S] >= SATURATION_MIN and hls[row, col, S] <= SATURATION_MAX):
-                        # se saturação não for muito fraca..
-                        
+                        # se saturação não for muito fraca...
                             if (hls[row, col, L] < (LUMA_MIN*1.5) and hls[row, col, S] < SATURATION_MIN*1.2):
                                 alphaLayer[row, col] = 1
                                 hls[row, col, S] = 0
                                 pass
                             else:
                                 # a saturação tem um peso sigmoidal na determinação do valor do px
-                                # TODO conferir fórmula
                                 saturacao = normalizar(hls[row, col, S], 255, 0)
-                                #mediaSaturacoesVerdesN = normalizar(mediaVerdes[S], 255)
-                                #weightSat = abs(saturacao - mediaSaturacoesVerdesN)
                                 weightSat = 1/(1+exp(5*(-saturacao+0.5)))
-                                #weightSat = normalizar(weightSat, 1)
-                                #print(weightSat)
                                 
-                                # TODO encontrar peso pro hue. Gaussiano?
-                                hueDist = abs(hls[row, col, H] - mediaHuesVerdes)
-                                weightHue = 1
-
                                 luminancia = normalizar(hls[row, col, L], 255, 0)
-                                lumaMediaNorm = normalizar(mediaVerdes[L], 255)
                                 pesoLuma = abs(luminancia - 0.5)
 
                                 # peso final 
-                                peso = weightSat * pesoLuma * weightHue
+                                peso = weightSat * pesoLuma
 
-                                #print(peso)
-                                #print(row, col)
-                                #print(alphaLayer[row, col])
                                 alphaLayer[row, col] = peso
-                                #hls[row, col, H] = peso*mediaHuesVerdes+hls[row, col, H]
-                                #print(alphaLayer[row, col])   
                     else:
-                        # se tiver certeza que não tem verde, mantém px original
                         alphaLayer[row, col] = 1
                         hls[row, col, S] = 0
                 else:
-                    # se tiver certeza que não tem verde, mantém px original
                     alphaLayer[row, col] = 1
                     hls[row, col, S] = 0
             elif(hls[row, col, H] >= GREEN_MIN-10 and hls[row, col, H] <= GREEN_MAX+10):
-                hls[row, col, S] = 50
+                hls[row, col, S] = hls[row, col, S]*0.5
                 alphaLayer[row, col] = 1
             else:
                 # se tiver certeza que não tem verde, mantém px original
                 alphaLayer[row, col] = 1
     
-    # alphaLayerColor = cv2.cvtColor(alphaLayerColor, cv2.COLOR_HLS2BGR)
-    # alphaLayer = cv2.cvtColor(alphaLayerColor, cv2.COLOR_BGR2GRAY)
-
-    
     alphaBinary = np.copy(alphaLayer)
     _, alphaBinary = cv2.threshold(alphaBinary, 0.95, 1, cv2.THRESH_BINARY)
     cv2.imshow("alpha binary", alphaBinary)
+
     # kernel = np.ones((3,3))
-    # alphaBinary = cv2.erode(alphaBinary, kernel, iterations=1)
-    # alphaBinary = cv2.dilate(alphaBinary, kernel, iterations=1)
-
     # alphaBinary = cv2.dilate(alphaBinary, kernel, iterations=1)
     # alphaBinary = cv2.erode(alphaBinary, kernel, iterations=1)
-
 
     # for row in range(rows):
     #     for col in range(cols):
@@ -212,24 +173,21 @@ def main():
         for col in range(cols):
             if(alphaLayer[row, col] < 1):
                 hls[row, col, S] = 0
-                
 
     alphaLayer = np.where(np.logical_and(alphaLayer <= 0.4, alphaLayer > 0.1), alphaLayer + 0.2, alphaLayer)
 
-    # img = np.where(img < threshold, 0, 1)
-
     cv2.imshow("alpha", alphaLayer)
+
     alphaLayer = cv2.cvtColor(alphaLayer, cv2.COLOR_GRAY2BGR)
     alphaLayer = cv2.GaussianBlur(alphaLayer, (0,0), 1.5)
     alphaLayer = cv2.medianBlur(alphaLayer, 3)
 
-
     cv2.imshow("alpha blur", alphaLayer)
-    bg = np.copy(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
-    bg = cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR)
 
-    bg[:]=(180,70,230)
-    #cv2.imshow('3 Channel Window', bg)
+    if(bgColor == True):
+        bg = np.copy(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+        bg = cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR)
+        bg[:]=(235, 52, 82)
 
     dst = np.copy(img)
     img = cv2.cvtColor(hls, cv2.COLOR_HLS2BGR)
@@ -240,32 +198,6 @@ def main():
 
     cv2.imshow("final", dst)
 
-    
-
-    #Image.fromarray(dst.astype(np.uint8)).save('data/dst/numpy_image_ab_grad.jpg')
-    # cv2.imshow("alphaColro", alphaLayerColor)
-
-    """     for px in hls[:, :, :]:
-        print(px)
-        if (px[H] == 54):
-           print("hi",px) """
-    
-
-    # converter pra HSL
-    # calcular valores HSL de interesse
-
-    # balanço de branco automático? como detectar o verde mais presente?
-    # ideia 1:
-    # fazer um "histograma de verdes": o verde com mais presença é o verde desejado
-
-    # ideia 2:
-    # histograma de hue. Na faixa esperada pro verde, encontrar média/mediana/moda (escolher o melhor??)
-    # "centralizar o verde nesse valor"
-
-    # zerar luminância dos valores de interesse
-    # converter a img com luma zerado pra BW
-    # exibir alpha layer
-    # cv2 addweighted, mas o peso é a alpha layer
     plt.show()
     cv2.waitKey()
     cv2.destroyAllWindows()
