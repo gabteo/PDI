@@ -5,12 +5,8 @@ import cv2
 from matplotlib import pyplot as plt
 import sys
 
-INPUT_IMAGE = 'img_in\\8.bmp'
+INPUT_IMAGE = 'img_in\\0.bmp'
 #INPUT_IMAGE = 'img_in\GSPlate.0116.bmp'
-
-#INPUT_IMAGE = 'img_in\hcw_godiva_medium.0110.png'
-#INPUT_IMAGE = 'img_in\green255.png'
-#INPUT_IMAGE = 'img_in\greenScale.png'
 BACKGROUND = 'bg\minecraft_bg.jpg'
 
 
